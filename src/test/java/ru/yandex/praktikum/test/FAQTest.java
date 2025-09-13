@@ -1,88 +1,86 @@
 package ru.yandex.praktikum.test;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import ru.yandex.praktikum.page.FAQPage;
 import ru.yandex.praktikum.page.HomePage;
+import ru.yandex.praktikum.page.Constants;
 
+import static org.junit.Assert.assertEquals;
+
+@RunWith(Parameterized.class)
 public class FAQTest {
 
-    @Test
-    public void FAQCorrectAnswerTextChrome() {
-        WebDriver driver = new ChromeDriver();
-        driver.get("https://qa-scooter.praktikum-services.ru");
+    private WebDriver driver;
+    private final String browserName;
+    private final String questionId;
+    private final String answerId;
+    private final String expectedAnswer;
 
-        WebElement tableFAQ = driver.findElement(By.xpath(".//div[@class='accordion']"));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", tableFAQ);
+    public FAQTest(String browserName, String questionId, String answerId, String expectedAnswer) {
+        this.browserName = browserName;
+        this.questionId = questionId;
+        this.answerId = answerId;
+        this.expectedAnswer = expectedAnswer;
+    }
 
-        HomePage objHomePage = new HomePage(driver);
+    @Parameterized.Parameters(name = "Browser: {0}, FAQ Question: {1}")
+    public static Object[][] getFAQData() {
+        return new Object[][]{
+                {"chrome", Constants.QUESTION_COST, Constants.ANSWER_COST},
+                {"chrome", Constants.QUESTION_MULTIPLE_SCOOTERS, Constants.ANSWER_MULTIPLE_SCOOTERS},
+                {"chrome", Constants.QUESTION_RENTAL_TIME, Constants.ANSWER_RENT_TIME},
+                {"chrome", Constants.QUESTION_TODAY_ORDER, Constants.ANSWER_TODAY_ORDER},
+                {"chrome", Constants.QUESTION_PROLONGATION, Constants.ANSWER_PROLONGATION},
+                {"chrome", Constants.QUESTION_CHARGER, Constants.ANSWER_CHARGER},
+                {"chrome", Constants.QUESTION_CANCEL, Constants.ANSWER_CANCEL},
+                {"chrome", Constants.QUESTION_OUTSIDE_MKAD, Constants.ANSWER_OUTSIDE_MKAD},
 
-        objHomePage.clickQuestion1();
-        objHomePage.isCorrectText(objHomePage.getAnswer1(), FAQPage.answer1Text);
+                {"firefox", Constants.QUESTION_COST, Constants.ANSWER_COST},
+                {"firefox", Constants.QUESTION_MULTIPLE_SCOOTERS, Constants.ANSWER_MULTIPLE_SCOOTERS},
+                {"firefox", Constants.QUESTION_RENTAL_TIME, Constants.ANSWER_RENT_TIME},
+                {"firefox", Constants.QUESTION_TODAY_ORDER, Constants.ANSWER_TODAY_ORDER},
+                {"firefox", Constants.QUESTION_PROLONGATION, Constants.ANSWER_PROLONGATION},
+                {"firefox", Constants.QUESTION_CHARGER, Constants.ANSWER_CHARGER},
+                {"firefox", Constants.QUESTION_CANCEL, Constants.ANSWER_CANCEL},
+                {"firefox", Constants.QUESTION_OUTSIDE_MKAD, Constants.ANSWER_OUTSIDE_MKAD},
+        };
+    }
 
-        objHomePage.clickQuestion2();
-        objHomePage.isCorrectText(objHomePage.getAnswer2(), FAQPage.answer2Text);
 
-        objHomePage.clickQuestion3();
-        objHomePage.isCorrectText(objHomePage.getAnswer3(), FAQPage.answer3Text);
-
-        objHomePage.clickQuestion4();
-        objHomePage.isCorrectText(objHomePage.getAnswer4(), FAQPage.answer4Text);
-
-        objHomePage.clickQuestion5();
-        objHomePage.isCorrectText(objHomePage.getAnswer5(), FAQPage.answer5Text);
-
-        objHomePage.clickQuestion6();
-        objHomePage.isCorrectText(objHomePage.getAnswer6(), FAQPage.answer6Text);
-
-        objHomePage.clickQuestion7();
-        objHomePage.isCorrectText(objHomePage.getAnswer7(), FAQPage.answer7Text);
-
-        objHomePage.clickQuestion8();
-        objHomePage.isCorrectText(objHomePage.getAnswer8(), FAQPage.answer8Text);
-
-        driver.quit();
+    @Before
+    public void setUp() {
+        if (browserName.equals("chrome")) {
+            driver = new ChromeDriver();
+        } else if (browserName.equals("firefox")) {
+            driver = new FirefoxDriver();
+        } else {
+            throw new IllegalArgumentException("Unsupported browser: " + browserName);
+        }
+        driver.manage().window().maximize();
     }
 
     @Test
-    public void FAQCorrectAnswerTextFirefox() {
-        WebDriver driver = new FirefoxDriver();
-        driver.get("https://qa-scooter.praktikum-services.ru");
+    public void testFAQAnswers() {
+        HomePage homePage = new HomePage(driver);
+        homePage.open();
+        homePage.acceptCookies();
+        homePage.scrollToFAQ();
+        homePage.clickFAQ(questionId);
+        String actualAnswer = homePage.getFAQAnswerText(answerId);
 
-        WebElement tableFAQ = driver.findElement(By.xpath(".//div[@class='accordion']"));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", tableFAQ);
+        assertEquals("FAQ answer mismatch for: " + questionId, expectedAnswer, actualAnswer);
+    }
 
-        HomePage objHomePage = new HomePage(driver);
-
-        objHomePage.clickQuestion1();
-        objHomePage.isCorrectText(objHomePage.getAnswer1(), FAQPage.answer1Text);
-
-        objHomePage.clickQuestion2();
-        objHomePage.isCorrectText(objHomePage.getAnswer2(), FAQPage.answer2Text);
-
-        objHomePage.clickQuestion3();
-        objHomePage.isCorrectText(objHomePage.getAnswer3(), FAQPage.answer3Text);
-
-        objHomePage.clickQuestion4();
-        objHomePage.isCorrectText(objHomePage.getAnswer4(), FAQPage.answer4Text);
-
-        objHomePage.clickQuestion5();
-        objHomePage.isCorrectText(objHomePage.getAnswer5(), FAQPage.answer5Text);
-
-        objHomePage.clickQuestion6();
-        objHomePage.isCorrectText(objHomePage.getAnswer6(), FAQPage.answer6Text);
-
-        objHomePage.clickQuestion7();
-        objHomePage.isCorrectText(objHomePage.getAnswer7(), FAQPage.answer7Text);
-
-        objHomePage.clickQuestion8();
-        objHomePage.isCorrectText(objHomePage.getAnswer8(), FAQPage.answer8Text);
-
-        driver.quit();
+    @After
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }

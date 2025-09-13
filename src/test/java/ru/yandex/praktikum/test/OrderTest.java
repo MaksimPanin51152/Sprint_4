@@ -1,68 +1,123 @@
 package ru.yandex.praktikum.test;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import ru.yandex.praktikum.page.FAQPage;
 import ru.yandex.praktikum.page.HomePage;
 import ru.yandex.praktikum.page.OrderPage;
 
+import static org.junit.Assert.assertTrue;
+
+@RunWith(Parameterized.class)
 public class OrderTest {
+    private WebDriver driver;
+    private HomePage homePage;
+    private OrderPage orderPage;
 
-    @Test
-    public void OrderPositiveTestChrome() {
-        WebDriver driver = new ChromeDriver();
-        driver.get("https://qa-scooter.praktikum-services.ru");
+    private final String browser;
+    private final String buttonType;
+    private final String name;
+    private final String surname;
+    private final String address;
+    private final String metroStation;
+    private final String phone;
+    private final String date;
+    private final String comment;
 
-        HomePage objHomePage = new HomePage(driver);
-        objHomePage.clickHeaderOrderButton();
+    public OrderTest(String browser,
+                     String buttonType,
+                     String name,
+                     String surname,
+                     String address,
+                     String metroStation,
+                     String phone,
+                     String date,
+                     String comment) {
+        this.browser = browser;
+        this.buttonType = buttonType;
+        this.name = name;
+        this.surname = surname;
+        this.address = address;
+        this.metroStation = metroStation;
+        this.phone = phone;
+        this.date = date;
+        this.comment = comment;
+    }
 
-        OrderPage objOrderPage = new OrderPage(driver);
-        objOrderPage.acceptCookieButtonClick();
-        objOrderPage.setName("Иван");
-        objOrderPage.setSurname("Иванов");
-        objOrderPage.setAddress("г. Москва, ул. Пушкина, д.10");
-        objOrderPage.setSubway("Театральная");
-        objOrderPage.setPhoneNumber("89151234567");
-        objOrderPage.clickOrderNextButton();
-        objOrderPage.setDate("01.01.2050");
-        objOrderPage.setRentalPeriod("сутки");
-        objOrderPage.setColor("чёрный жемчуг");
-        objOrderPage.setComment("Не звонить в дверь");
-        objOrderPage.clickOrderCreateButton();
-        objOrderPage.clickOrderConfirmButton();
+    @Parameterized.Parameters(name = "Browser: {0}, Button: {1}, User: {2} {3}")
+    public static Object[][] testData() {
+        return new Object[][]{
+                {"chrome", "header", "Иван", "Иванов", "Москва, ул. Пушкина, д. 10", "Сокольники", "+79991234567", "20.12.2025", "Позвоните за 30 минут"},
+                {"chrome", "page", "Мария", "Петрова", "Москва, ул. Ленина, д. 5", "Арбатская", "+79997654321", "25.12.2025", "Не звоните, сплю"},
+                {"firefox", "header", "Алексей", "Сидоров", "Москва, пр-т Мира, д. 15", "ВДНХ", "+79993456789", "30.12.2025", "Оставьте у консьержа"},
+                {"firefox", "page", "Елена", "Кузнецова", "Москва, ул. Тверская, д. 1", "Тверская", "+79998887766", "01.01.2026", "Позвоните за 10 минут"}
+        };
+    }
 
-        objOrderPage.isPageOpen(objOrderPage.getConfirmHeader(), FAQPage.confirmHeader);
+    @Before
+    public void setUp() {
+        if ("firefox".equals(browser)) {
+            driver = new FirefoxDriver();
+        } else {
+            driver = new ChromeDriver();
+        }
+        homePage = new HomePage(driver);
+        orderPage = new OrderPage(driver);
 
-        driver.quit();
+        homePage.open();
+        homePage.acceptCookies();
     }
 
     @Test
-    public void OrderPositiveTestFirefox() {
-        WebDriver driver = new FirefoxDriver();
-        driver.get("https://qa-scooter.praktikum-services.ru");
+    public void testScooterOrderFlow() {
+        makeOrder(buttonType, name, surname, address, metroStation, phone, date, comment);
 
-        HomePage objHomePage = new HomePage(driver);
-        objHomePage.clickHeaderOrderButton();
+        assertTrue(
+                "Ожидалось подтверждение заказа, но окно не появилось",
+                orderPage.isOrderConfirmed()
+        );
+    }
 
-        OrderPage objOrderPage = new OrderPage(driver);
-        objOrderPage.acceptCookieButtonClick();
-        objOrderPage.setName("Ирина");
-        objOrderPage.setSurname("Авдеева");
-        objOrderPage.setAddress("проспект Маяковского 6");
-        objOrderPage.setSubway("Маяковская");
-        objOrderPage.setPhoneNumber("+79657654321");
-        objOrderPage.clickOrderNextButton();
-        objOrderPage.setDate("10.10.2030");
-        objOrderPage.setRentalPeriod("двое суток");
-        objOrderPage.setColor("серая безысходность");
-        objOrderPage.setComment("Привезите чистый самокат");
-        objOrderPage.clickOrderCreateButton();
-        objOrderPage.clickOrderConfirmButton();
+    @After
+    public void teardown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
 
-        objOrderPage.isPageOpen(objOrderPage.getConfirmHeader(), FAQPage.confirmHeader);
+    private void makeOrder(String buttonType,
+                           String name,
+                           String surname,
+                           String address,
+                           String metroStation,
+                           String phone,
+                           String date,
+                           String comment) {
 
-        driver.quit();
+        if ("header".equals(buttonType)) {
+            homePage.clickHeaderOrderButton();
+        } else {
+            homePage.clickPageOrderButton();
+        }
+
+        orderPage.enterName(name);
+        orderPage.enterSurname(surname);
+        orderPage.enterAddress(address);
+        orderPage.selectMetroStation(metroStation);
+        orderPage.enterPhone(phone);
+        orderPage.clickNextButton();
+
+        orderPage.enterDate(date);
+        orderPage.selectRentalPeriod();
+        orderPage.chooseScooterColorBlack();
+        orderPage.enterComment(comment);
+        orderPage.clickOrderButton();
+
+        orderPage.confirmOrder();
     }
 }
