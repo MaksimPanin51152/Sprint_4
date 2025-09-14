@@ -1,96 +1,124 @@
 package ru.yandex.praktikum.page;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class OrderPage {
     private final WebDriver driver;
+    private final WebDriverWait wait;
 
-    private final By nameInput = By.xpath("//input[@placeholder='* Имя']");
-    private final By surnameInput = By.xpath("//input[@placeholder='* Фамилия']");
-    private final By addressInput = By.xpath("//input[@placeholder='* Адрес: куда привезти заказ']");
-    private final By metroStationInput = By.xpath("//input[@placeholder='* Станция метро']");
-    private final By phoneInput = By.xpath("//input[@placeholder='* Телефон: на него позвонит курьер']");
+    // ===== Локаторы формы заказа =====
+    private final By nameField = By.xpath("//input[@placeholder='* Имя']");
+    private final By surnameField = By.xpath("//input[@placeholder='* Фамилия']");
+    private final By addressField = By.xpath("//input[@placeholder='* Адрес: куда привезти заказ']");
+    private final By metroField = By.className("select-search__input");
+    private final String metroOptionPattern = "//div[@class='select-search__select']//div[text()='%s']";
+    private final By phoneField = By.xpath("//input[@placeholder='* Телефон: на него позвонит курьер']");
     private final By nextButton = By.xpath("//button[text()='Далее']");
-
-    private final By dateInput = By.xpath("//input[@placeholder='* Когда привезти самокат']");
-    private final By rentalPeriodDropdown = By.className("Dropdown-placeholder");
-    private final By rentalPeriodOption = By.xpath("//div[@class='Dropdown-menu']/div[1]");
-    private final By scooterColorBlack = By.id("black");
-    private final By scooterColorGrey = By.id("grey");
-    private final By commentInput = By.xpath("//input[@placeholder='Комментарий для курьера']");
-    private final By orderButton = By.xpath("//button[@class='Button_Button__ra12g Button_Middle__1CSJM']");
-
+    private final By dateField = By.xpath("//input[@placeholder='* Когда привезти самокат']");
+    private final By rentalPeriodDropdown = By.className("Dropdown-arrow");
+    private final String rentalPeriodOptionPattern = "//div[@class='Dropdown-menu']/div[text()='%s']";
+    private final String scooterColorPattern = "//input[@id='%s']";
+    private final By commentField = By.xpath("//input[@placeholder='Комментарий для курьера']");
+    private final By orderButton = By.xpath("//button[contains(text(),'Заказать')]");
     private final By confirmYesButton = By.xpath("//button[text()='Да']");
-    private final By successModalTitle = By.className("Order_ModalHeader__3FDaJ");
+    private final By orderModalHeader = By.xpath("//div[contains(@class,'Order_ModalHeader')]");
+    private final By orderModalText = By.xpath("//div[contains(@class,'Order_ModalText')]");
+
+    // ===== Локаторы кнопок открытия страницы заказа =====
+    private final By orderButtonHeader = By.xpath("//button[@class='Button_Button__ra12g']");
+    private final By orderButtonBottom = By.xpath("(//button[contains(text(),'Заказать')])[2]");
+    private final By orderPageTitle = By.xpath("//*[text()='Для кого самокат']");
+    private final By cookieButton = By.id("rcc-confirm-button");
+
 
     public OrderPage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, 5);
     }
 
-    public void enterName(String name) {
-        driver.findElement(nameInput).sendKeys(name);
+    public void acceptCookies() {
+        try {
+            WebElement cookie = wait.until(ExpectedConditions.elementToBeClickable(cookieButton));
+            cookie.click();
+        } catch (Exception ignored) {
+            // баннера может не быть
+        }
+    }
+    // ===== Методы формы заказа =====
+    public void fillName(String name) {
+        driver.findElement(nameField).sendKeys(name);
     }
 
-    public void enterSurname(String surname) {
-        driver.findElement(surnameInput).sendKeys(surname);
+    public void fillSurname(String surname) {
+        driver.findElement(surnameField).sendKeys(surname);
     }
 
-    public void enterAddress(String address) {
-        driver.findElement(addressInput).sendKeys(address);
+    public void fillAddress(String address) {
+        driver.findElement(addressField).sendKeys(address);
     }
 
-    public void selectMetroStation(String station) {
-        WebElement metroInput = driver.findElement(metroStationInput);
-        metroInput.sendKeys(station);
-        metroInput.sendKeys(Keys.ARROW_DOWN, Keys.ENTER);
+    public void selectMetro(String metroStation) {
+        driver.findElement(metroField).click();
+        By metroOption = By.xpath(String.format(metroOptionPattern, metroStation));
+        wait.until(ExpectedConditions.elementToBeClickable(metroOption)).click();
     }
 
-    public void enterPhone(String phone) {
-        driver.findElement(phoneInput).sendKeys(phone);
+    public void fillPhone(String phone) {
+        driver.findElement(phoneField).sendKeys(phone);
     }
 
-    public void clickNextButton() {
+    public void clickNext() {
         driver.findElement(nextButton).click();
     }
 
-    public void enterDate(String date) {
-        WebElement dateField = driver.findElement(dateInput);
-        dateField.sendKeys(date);
-        dateField.sendKeys(Keys.ENTER);
+    public void setDate(String date) {
+        driver.findElement(dateField).sendKeys(date);
     }
 
-    public void selectRentalPeriod() {
+    public void selectRentalPeriod(String period) {
         driver.findElement(rentalPeriodDropdown).click();
-        driver.findElement(rentalPeriodOption).click();
+        By option = By.xpath(String.format(rentalPeriodOptionPattern, period));
+        wait.until(ExpectedConditions.elementToBeClickable(option)).click();
     }
 
-    public void chooseScooterColorBlack() {
-        driver.findElement(scooterColorBlack).click();
+    public void chooseScooterColor(String colorId) {
+        By colorLocator = By.xpath(String.format(scooterColorPattern, colorId));
+        driver.findElement(colorLocator).click();
     }
 
-    public void chooseScooterColorGrey() {
-        driver.findElement(scooterColorGrey).click();
+    public void fillComment(String comment) {
+        driver.findElement(commentField).sendKeys(comment);
     }
 
-    public void enterComment(String comment) {
-        driver.findElement(commentInput).sendKeys(comment);
+    public void submitOrder() {
+        driver.findElement(orderButton).click();
+        wait.until(ExpectedConditions.elementToBeClickable(confirmYesButton)).click();
     }
 
-    public void clickOrderButton() {
-        WebElement orderBtn = driver.findElement(orderButton);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", orderBtn);
-        orderBtn.click();
+    public String getOrderModalHeader() {
+        WebElement header = wait.until(ExpectedConditions.visibilityOfElementLocated(orderModalHeader));
+        return header.getText().trim();
     }
 
-    public void confirmOrder() {
-        driver.findElement(confirmYesButton).click();
+    public String getOrderModalText() {
+        WebElement text = wait.until(ExpectedConditions.visibilityOfElementLocated(orderModalText));
+        return text.getText().trim();
     }
 
-    public boolean isOrderConfirmed() {
-        return driver.findElement(successModalTitle).isDisplayed();
+    // ===== Методы для OrderPageOpenTest =====
+    public void clickOrderButtonHeader() {
+        wait.until(ExpectedConditions.elementToBeClickable(orderButtonHeader)).click();
+    }
+
+    public void clickOrderButtonBottom() {
+        wait.until(ExpectedConditions.elementToBeClickable(orderButtonBottom)).click();
+    }
+
+    public boolean isOrderPageOpened() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(orderPageTitle)).isDisplayed();
     }
 }

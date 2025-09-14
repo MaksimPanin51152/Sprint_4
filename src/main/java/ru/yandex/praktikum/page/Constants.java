@@ -3,14 +3,14 @@ package ru.yandex.praktikum.page;
 public class Constants {
 
     // ===== Вопросы =====
-    public static final String QUESTION_COST = "accordion__heading-0";
-    public static final String QUESTION_MULTIPLE_SCOOTERS = "accordion__heading-1";
-    public static final String QUESTION_RENTAL_TIME = "accordion__heading-2";
-    public static final String QUESTION_TODAY_ORDER = "accordion__heading-3";
-    public static final String QUESTION_PROLONGATION = "accordion__heading-4";
-    public static final String QUESTION_CHARGER = "accordion__heading-5";
-    public static final String QUESTION_CANCEL = "accordion__heading-6";
-    public static final String QUESTION_OUTSIDE_MKAD = "accordion__heading-7";
+    public static final String QUESTION_COST = "Сколько это стоит? И как оплатить?";
+    public static final String QUESTION_MULTIPLE_SCOOTERS = "Хочу сразу несколько самокатов! Так можно?";
+    public static final String QUESTION_RENTAL_TIME = "Как рассчитывается время аренды?";
+    public static final String QUESTION_TODAY_ORDER = "Можно ли заказать самокат прямо на сегодня?";
+    public static final String QUESTION_PROLONGATION = "Можно ли продлить заказ или вернуть самокат раньше?";
+    public static final String QUESTION_CHARGER = "Вы привозите зарядку вместе с самокатом?";
+    public static final String QUESTION_CANCEL = "Можно ли отменить заказ?";
+    public static final String QUESTION_OUTSIDE_MKAD = "Я живу за МКАДом, привезёте?";
 
     // ===== Ответы =====
     public static final String ANSWER_COST =
@@ -35,9 +35,4 @@ public class Constants {
     public static final String TITLE_ORDER_PAGE_RENT = "Про аренду";
     public static final String TITLE_ORDER_CONFIRMATION_MODAL = "Хотите оформить заказ?";
     public static final String TITLE_ORDER_SUCCESS = "Заказ оформлен";
-
-    // ===== Кнопки заказа =====
-    public static final String ORDER_BUTTON_HEADER = "//button[@class='Button_Button__ra12g']";
-    public static final String ORDER_BUTTON_BOTTOM = "(//button[contains(text(),'Заказать')])[2]";
-    public static final String ORDER_PAGE_TITLE = "//*[text()='Для кого самокат']";
 }
