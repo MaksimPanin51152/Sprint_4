@@ -28,26 +28,14 @@ public class OrderPage {
     private final By orderModalHeader = By.xpath("//div[contains(@class,'Order_ModalHeader')]");
     private final By orderModalText = By.xpath("//div[contains(@class,'Order_ModalText')]");
 
-    // ===== Локаторы кнопок открытия страницы заказа =====
-    private final By orderButtonHeader = By.xpath("//button[@class='Button_Button__ra12g']");
-    private final By orderButtonBottom = By.xpath("(//button[contains(text(),'Заказать')])[2]");
+    // ===== Заголовок страницы заказа =====
     private final By orderPageTitle = By.xpath("//*[text()='Для кого самокат']");
-    private final By cookieButton = By.id("rcc-confirm-button");
-
 
     public OrderPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, 5);
     }
 
-    public void acceptCookies() {
-        try {
-            WebElement cookie = wait.until(ExpectedConditions.elementToBeClickable(cookieButton));
-            cookie.click();
-        } catch (Exception ignored) {
-            // баннера может не быть
-        }
-    }
     // ===== Методы формы заказа =====
     public void fillName(String name) {
         driver.findElement(nameField).sendKeys(name);
@@ -109,16 +97,10 @@ public class OrderPage {
         return text.getText().trim();
     }
 
-    // ===== Методы для OrderPageOpenTest =====
-    public void clickOrderButtonHeader() {
-        wait.until(ExpectedConditions.elementToBeClickable(orderButtonHeader)).click();
-    }
-
-    public void clickOrderButtonBottom() {
-        wait.until(ExpectedConditions.elementToBeClickable(orderButtonBottom)).click();
-    }
-
+    // ===== Метод для проверки открытия страницы заказа =====
     public boolean isOrderPageOpened() {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(orderPageTitle)).isDisplayed();
     }
 }
+
+

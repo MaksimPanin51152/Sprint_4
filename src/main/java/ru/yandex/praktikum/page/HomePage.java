@@ -15,16 +15,17 @@ public class HomePage {
     private final String questionPattern = "//div[text()='%s']";
     private final By openedAnswer = By.xpath("//div[@class='accordion__panel' and not(@hidden)]");
 
+    // Кнопки заказа и куки
     private final By orderButtonHeader = By.xpath("//button[@class='Button_Button__ra12g']");
     private final By orderButtonBottom = By.xpath("//div[@class='Home_FinishButton__1_cWm']//button");
     private final By cookieButton = By.id("rcc-confirm-button");
-
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, 5);
     }
 
+    // --- Методы работы с куками ---
     public void acceptCookies() {
         try {
             WebElement cookie = wait.until(ExpectedConditions.elementToBeClickable(cookieButton));
@@ -34,6 +35,7 @@ public class HomePage {
         }
     }
 
+    // --- Методы работы с FAQ ---
     public void scrollToFAQ() {
         WebElement faq = wait.until(ExpectedConditions.visibilityOfElementLocated(faqSection));
         faq.click();
@@ -49,6 +51,7 @@ public class HomePage {
         return answer.getText().trim();
     }
 
+    // --- Методы работы с кнопками заказа ---
     public void clickOrderButtonHeader() {
         wait.until(ExpectedConditions.elementToBeClickable(orderButtonHeader)).click();
     }

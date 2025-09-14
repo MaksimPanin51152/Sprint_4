@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import ru.yandex.praktikum.page.HomePage;
 import ru.yandex.praktikum.page.OrderPage;
 
 import static org.junit.Assert.assertTrue;
@@ -37,8 +38,10 @@ public class OrderTest {
 
     @Test
     public void createOrderSuccessfully() {
+        HomePage homePage = new HomePage(driver);
+        homePage.acceptCookies();
+
         OrderPage orderPage = new OrderPage(driver);
-        orderPage.acceptCookies();
 
         orderPage.fillName("Иван");
         orderPage.fillSurname("Иванов");
