@@ -18,7 +18,6 @@ public class HomePage {
         this.wait = new WebDriverWait(driver, 5); // Selenium 3: время в секундах
     }
 
-    // клик по вопросу
     public void clickQuestion(String questionText) {
         WebElement question = wait.until(
                 ExpectedConditions.elementToBeClickable(
@@ -28,7 +27,6 @@ public class HomePage {
         question.click();
     }
 
-    // проверка ответа (ждём, пока текст появится)
     public void checkAnswerText(String questionText, String expectedAnswer) {
         WebElement answer = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(
@@ -40,11 +38,9 @@ public class HomePage {
                 expectedAnswer, actualText);
     }
 
-    // скролл к FAQ
     public void scrollToFAQ() {
         WebElement faqBlock = driver.findElement(By.className("Home_FAQ__3uVm4"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", faqBlock);
     }
 
-    // клики по кнопкам заказа и куки можешь оставить как есть
 }
