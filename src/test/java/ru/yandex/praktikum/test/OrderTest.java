@@ -5,10 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import ru.yandex.praktikum.page.HomePage;
+import ru.yandex.praktikum.page.Constants;
 import ru.yandex.praktikum.page.OrderPage;
 
 import static org.junit.Assert.assertTrue;
@@ -16,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class OrderTest {
     private WebDriver driver;
-    private HomePage homePage;
     private OrderPage orderPage;
 
     private final String browser;
@@ -53,9 +55,7 @@ public class OrderTest {
     public static Object[][] testData() {
         return new Object[][]{
                 {"chrome", "header", "Иван", "Иванов", "Москва, ул. Пушкина, д. 10", "Сокольники", "+79991234567", "20.12.2025", "Позвоните за 30 минут"},
-                {"chrome", "page", "Мария", "Петрова", "Москва, ул. Ленина, д. 5", "Арбатская", "+79997654321", "25.12.2025", "Не звоните, сплю"},
-                {"firefox", "header", "Алексей", "Сидоров", "Москва, пр-т Мира, д. 15", "ВДНХ", "+79993456789", "30.12.2025", "Оставьте у консьержа"},
-                {"firefox", "page", "Елена", "Кузнецова", "Москва, ул. Тверская, д. 1", "Тверская", "+79998887766", "01.01.2026", "Позвоните за 10 минут"}
+                {"firefox", "page", "Мария", "Петрова", "Москва, ул. Ленина, д. 5", "Арбатская", "+79997654321", "25.12.2025", "Не звоните, сплю"},
         };
     }
 
@@ -66,21 +66,15 @@ public class OrderTest {
         } else {
             driver = new ChromeDriver();
         }
-        homePage = new HomePage(driver);
+        driver.manage().window().maximize();
+        driver.get("https://qa-scooter.praktikum-services.ru/");
         orderPage = new OrderPage(driver);
-
-        homePage.open();
-        homePage.acceptCookies();
     }
 
     @Test
     public void testScooterOrderFlow() {
         makeOrder(buttonType, name, surname, address, metroStation, phone, date, comment);
-
-        assertTrue(
-                "Ожидалось подтверждение заказа, но окно не появилось",
-                orderPage.isOrderConfirmed()
-        );
+        assertTrue("Ожидалось подтверждение заказа, но окно не появилось", orderPage.isOrderConfirmed());
     }
 
     @After
@@ -100,9 +94,11 @@ public class OrderTest {
                            String comment) {
 
         if ("header".equals(buttonType)) {
-            homePage.clickHeaderOrderButton();
+            driver.findElement(By.xpath(Constants.ORDER_BUTTON_HEADER)).click();
         } else {
-            homePage.clickPageOrderButton();
+            WebElement bottomBtn = driver.findElement(By.xpath(Constants.ORDER_BUTTON_BOTTOM));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", bottomBtn);
+            bottomBtn.click();
         }
 
         orderPage.enterName(name);

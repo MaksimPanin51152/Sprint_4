@@ -4,72 +4,47 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import static org.junit.Assert.assertEquals;
 
 public class HomePage {
     private final WebDriver driver;
-
-    public static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/";
-
-    private final By headerOrderButton = By.xpath("(//button[text()='Заказать'])[1]");
-    private final By pageOrderButton = By.xpath("(//button[text()='Заказать'])[2]");
-
-    private final By cookieAcceptButton = By.xpath(".//button[text()='да все привыкли']");
-
-    private final By faqAccordion = By.cssSelector(".accordion");
-
-    private final By questionCost = By.id("accordion__heading-0");
-    private final By questionMultipleScooters = By.id("accordion__heading-1");
-    private final By questionRentalTime = By.id("accordion__heading-2");
-    private final By questionOrderToday = By.id("accordion__heading-3");
-    private final By questionExtendReturn = By.id("accordion__heading-4");
-    private final By questionCharger = By.id("accordion__heading-5");
-    private final By questionCancel = By.id("accordion__heading-6");
-    private final By questionOutskirts = By.id("accordion__heading-7");
-
-    private final By answerCost = By.id("accordion__panel-0");
-    private final By answerMultipleScooters = By.id("accordion__panel-1");
-    private final By answerRentalTime = By.id("accordion__panel-2");
-    private final By answerOrderToday = By.id("accordion__panel-3");
-    private final By answerExtendReturn = By.id("accordion__panel-4");
-    private final By answerCharger = By.id("accordion__panel-5");
-    private final By answerCancel = By.id("accordion__panel-6");
-    private final By answerOutskirts = By.id("accordion__panel-7");
+    private final WebDriverWait wait;
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, 5); // Selenium 3: время в секундах
     }
 
-    public void open() {
-        driver.get(BASE_URL);
+    // клик по вопросу
+    public void clickQuestion(String questionText) {
+        WebElement question = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//div[contains(text(),'" + questionText + "')]")
+                )
+        );
+        question.click();
     }
 
-    public void acceptCookies() {
-        if (!driver.findElements(cookieAcceptButton).isEmpty()) {
-            driver.findElement(cookieAcceptButton).click();
-        }
+    // проверка ответа (ждём, пока текст появится)
+    public void checkAnswerText(String questionText, String expectedAnswer) {
+        WebElement answer = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//div[contains(@class,'accordion__panel') and not(@hidden)]")
+                )
+        );
+        String actualText = answer.getText().trim();
+        assertEquals("Текст ответа не совпадает для вопроса: " + questionText,
+                expectedAnswer, actualText);
     }
 
-    public void clickHeaderOrderButton() {
-        driver.findElement(headerOrderButton).click();
-    }
-
-    public void clickPageOrderButton() {
-        WebElement bigButton = driver.findElement(pageOrderButton);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", bigButton);
-        bigButton.click();
-    }
-
+    // скролл к FAQ
     public void scrollToFAQ() {
-        WebElement accordion = driver.findElement(faqAccordion);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", accordion);
+        WebElement faqBlock = driver.findElement(By.className("Home_FAQ__3uVm4"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();", faqBlock);
     }
 
-    public void clickFAQ(String questionId) {
-        driver.findElement(By.id(questionId)).click();
-    }
-
-    public String getFAQAnswerText(String answerId) {
-        return driver.findElement(By.id(answerId)).getText().trim();
-    }
+    // клики по кнопкам заказа и куки можешь оставить как есть
 }
