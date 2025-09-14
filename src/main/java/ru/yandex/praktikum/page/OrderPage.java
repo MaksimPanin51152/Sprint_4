@@ -10,35 +10,37 @@ public class OrderPage {
     private final WebDriver driver;
     private final WebDriverWait wait;
 
-    // ===== Локаторы формы заказа =====
+    // Локаторы для первой страницы формы заказа
     private final By nameField = By.xpath("//input[@placeholder='* Имя']");
     private final By surnameField = By.xpath("//input[@placeholder='* Фамилия']");
     private final By addressField = By.xpath("//input[@placeholder='* Адрес: куда привезти заказ']");
     private final By metroField = By.className("select-search__input");
-    private final String metroOptionPattern = "//div[@class='select-search__select']//div[text()='%s']";
+    private final String metroOptionPattern = "//div[text()='%s']";
     private final By phoneField = By.xpath("//input[@placeholder='* Телефон: на него позвонит курьер']");
     private final By nextButton = By.xpath("//button[text()='Далее']");
-    private final By dateField = By.xpath("//input[@placeholder='* Когда привезти самокат']");
-    private final By rentalPeriodDropdown = By.className("Dropdown-arrow");
-    private final String rentalPeriodOptionPattern = "//div[@class='Dropdown-menu']/div[text()='%s']";
-    private final String scooterColorPattern = "//input[@id='%s']";
-    private final By commentField = By.xpath("//input[@placeholder='Комментарий для курьера']");
-    private final By orderButton = By.xpath("//button[contains(text(),'Заказать')]");
-    private final By confirmYesButton = By.xpath("//button[text()='Да']");
-    private final By orderModalHeader = By.xpath("//div[contains(@class,'Order_ModalHeader')]");
-    private final By orderModalText = By.xpath("//div[contains(@class,'Order_ModalText')]");
 
-    // ===== Заголовок страницы заказа =====
-    private final By orderPageTitle = By.xpath("//*[text()='Для кого самокат']");
+    // Локаторы для второй страницы формы заказа
+    private final By dateField = By.xpath("//input[@placeholder='* Когда привезти самокат']");
+    private final By rentalPeriodDropdown = By.className("Dropdown-placeholder");
+    private final String rentalPeriodOptionPattern = "//div[@class='Dropdown-option' and text()='%s']";
+    private final By blackColorCheckbox = By.id("black");
+    private final By greyColorCheckbox = By.id("grey");
+    private final By commentField = By.xpath("//input[@placeholder='Комментарий для курьера']");
+    private final By orderSubmitButton = By.xpath("//button[text()='Заказать']");
+
+    // Модальное окно подтверждения
+    private final By confirmYesButton = By.xpath("//button[text()='Да']");
+    private final By modalHeader = By.className("Order_ModalHeader__3FDaJ");
+    private final By modalText = By.className("Order_Modal__YZ-d3");
 
     public OrderPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, 5);
     }
 
-    // ===== Методы формы заказа =====
+    // Методы для первой страницы
     public void fillName(String name) {
-        driver.findElement(nameField).sendKeys(name);
+        wait.until(ExpectedConditions.elementToBeClickable(nameField)).sendKeys(name);
     }
 
     public void fillSurname(String surname) {
@@ -49,10 +51,10 @@ public class OrderPage {
         driver.findElement(addressField).sendKeys(address);
     }
 
-    public void selectMetro(String metroStation) {
+    public void selectMetro(String metro) {
         driver.findElement(metroField).click();
-        By metroOption = By.xpath(String.format(metroOptionPattern, metroStation));
-        wait.until(ExpectedConditions.elementToBeClickable(metroOption)).click();
+        By option = By.xpath(String.format(metroOptionPattern, metro));
+        wait.until(ExpectedConditions.elementToBeClickable(option)).click();
     }
 
     public void fillPhone(String phone) {
@@ -63,8 +65,11 @@ public class OrderPage {
         driver.findElement(nextButton).click();
     }
 
+    // Методы для второй страницы
     public void setDate(String date) {
-        driver.findElement(dateField).sendKeys(date);
+        WebElement dateInput = driver.findElement(dateField);
+        dateInput.sendKeys(date);
+        dateInput.submit();
     }
 
     public void selectRentalPeriod(String period) {
@@ -73,9 +78,12 @@ public class OrderPage {
         wait.until(ExpectedConditions.elementToBeClickable(option)).click();
     }
 
-    public void chooseScooterColor(String colorId) {
-        By colorLocator = By.xpath(String.format(scooterColorPattern, colorId));
-        driver.findElement(colorLocator).click();
+    public void chooseScooterColor(String color) {
+        if ("black".equalsIgnoreCase(color)) {
+            driver.findElement(blackColorCheckbox).click();
+        } else if ("grey".equalsIgnoreCase(color)) {
+            driver.findElement(greyColorCheckbox).click();
+        }
     }
 
     public void fillComment(String comment) {
@@ -83,23 +91,26 @@ public class OrderPage {
     }
 
     public void submitOrder() {
-        driver.findElement(orderButton).click();
+        wait.until(ExpectedConditions.elementToBeClickable(orderSubmitButton)).click();
+    }
+
+    // Подтверждение заказа в модалке
+    public void confirmOrder() {
         wait.until(ExpectedConditions.elementToBeClickable(confirmYesButton)).click();
     }
 
+    // Методы проверки модального окна
     public String getOrderModalHeader() {
-        WebElement header = wait.until(ExpectedConditions.visibilityOfElementLocated(orderModalHeader));
-        return header.getText().trim();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(modalHeader)).getText();
     }
 
     public String getOrderModalText() {
-        WebElement text = wait.until(ExpectedConditions.visibilityOfElementLocated(orderModalText));
-        return text.getText().trim();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(modalText)).getText();
     }
 
-    // ===== Метод для проверки открытия страницы заказа =====
+    // Проверка, что форма заказа открылась
     public boolean isOrderPageOpened() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(orderPageTitle)).isDisplayed();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(nameField)).isDisplayed();
     }
 }
 

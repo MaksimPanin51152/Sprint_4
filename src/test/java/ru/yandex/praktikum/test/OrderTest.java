@@ -43,6 +43,7 @@ public class OrderTest {
 
         OrderPage orderPage = new OrderPage(driver);
 
+        // Заполняем первую часть формы
         orderPage.fillName("Иван");
         orderPage.fillSurname("Иванов");
         orderPage.fillAddress("Москва, Тверская 1");
@@ -50,12 +51,17 @@ public class OrderTest {
         orderPage.fillPhone("+79998887766");
         orderPage.clickNext();
 
+        // Заполняем вторую часть формы
         orderPage.setDate("15.09.2025");
         orderPage.selectRentalPeriod("двое суток");
         orderPage.chooseScooterColor("black");
         orderPage.fillComment("Позвонить за 30 минут до приезда");
-        orderPage.submitOrder();
 
+        // Оформляем заказ
+        orderPage.submitOrder();   // клик по "Заказать"
+        orderPage.confirmOrder();  // клик по "Да"
+
+        // Проверка
         String header = orderPage.getOrderModalHeader();
         String text = orderPage.getOrderModalText();
 
@@ -63,5 +69,3 @@ public class OrderTest {
                 header.contains("Заказ оформлен") || text.contains("Заказ оформлен"));
     }
 }
-
-
